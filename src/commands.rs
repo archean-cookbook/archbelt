@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use crate::archean::json::*;
 use crate::descriptors;
 use crate::statics::{COMMAND, DESCRIPTION, VERSION};
@@ -31,8 +32,15 @@ pub fn match_commands(sub_command: &str, args: &ArgMatches) {
 }
 
 pub fn yank_xenon_code(args: &ArgMatches) {
-    if let Some(bp) = args.get_many::<String>("BLUEPRINT") {
-        let blueprint = format!("{:?}.json", bp);
+    if let Some(bp_arg) = args.get_many::<String>("BLUEPRINT") {
+        // collect the bp_arg IntoIterator of &String into a vector of String
+        let mut bp_name: Vec<String> = vec![];
+        bp_arg.into_iter().for_each(|bp| {
+            let name = bp.deref().to_string();
+            bp_name.push(name);
+        });
+        let bp_name = bp_name.join(" ");
+        let blueprint = format!("{:?}.json", bp_name);
         let bp_path = get_blueprint_path(blueprint);
         // TODO: move to private func
         if !bp_path.exists() {
