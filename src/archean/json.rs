@@ -1,4 +1,3 @@
-use std::io::Error;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -18,6 +17,12 @@ pub struct Blueprint {
     #[serde(rename = "type")]
     pub type_field: String,
     pub version: i64,
+}
+
+impl Blueprint {
+    pub fn components_with_hdd(&self) -> Vec<Component> {
+        self.data.components.iter().filter(|c| c.has_data_storage()).cloned().collect()
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
