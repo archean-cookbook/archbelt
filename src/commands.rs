@@ -1,3 +1,4 @@
+use std::fs;
 use std::ops::Deref;
 use crate::archean::json::*;
 use crate::descriptors;
@@ -40,7 +41,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
             bp_name.push(name);
         });
         let bp_name = bp_name.join(" ");
-        let blueprint = format!("{:?}.json", bp_name);
+        let blueprint = format!("{}.json", bp_name);
         let bp_path = get_blueprint_path(blueprint);
         // TODO: move to private func
         if !bp_path.exists() {
@@ -49,9 +50,25 @@ pub fn yank_xenon_code(args: &ArgMatches) {
             std::process::exit(1);
         }
         let bp_string = std::fs::read_to_string(bp_path).unwrap();
-        println!("{:?}", bp_string);
         let blueprint: Blueprint = serde_json::from_str(&bp_string).unwrap();
-        println!("{:?}", blueprint);
+
+        let mut files: Vec<XcFile> = vec![];
+        blueprint.components_with_hdd().iter().for_each(|c| {
+            let hdd = c.with_hdd().ok().unwrap();
+            hdd.xc_files().iter().for_each(|f| {
+                files.push(f.clone());
+            });
+        });
+
+        if files.is_empty() {
+            println!("🚨 No files found! 🚨");
+            std::process::exit(0);
+        }
+
+        // For each XcFile, create the file on disk and write the plain_code to it
+        files.iter().for_each(|f| {
+            fs::write(f.name.clone(), f.plain_code.clone()).expect("Unable to write file");
+        });
     }
 }
 
