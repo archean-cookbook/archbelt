@@ -1,3 +1,4 @@
+use std::fs::File;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -108,7 +109,7 @@ pub struct Component {
 }
 
 #[derive(Debug, Clone)]
-struct JsonError;
+pub struct JsonError;
 
 impl Component {
     pub fn with_hdd(&self) -> Result<Hdd, JsonError> {
@@ -162,6 +163,12 @@ pub struct Hdd {
     pub label: String,
     #[serde(rename = "xc_files")]
     pub xc_files: Vec<XcFile>,
+}
+
+impl Hdd {
+    pub fn xc_files(&self) -> Vec<XcFile> {
+        self.xc_files.clone()
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
