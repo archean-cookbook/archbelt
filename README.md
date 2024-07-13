@@ -5,7 +5,7 @@ A tool to work with Archean blueprints and XenonCode modules; primarily for use 
 ## Features
 The following features are in-development: 
 
-- [ ] Yank code from blueprint as `.xc` file
+- [X] Yank code from blueprint as `.xc` file
 - [ ] Copy blueprints to current location for packaging
 - [ ] Initialize version control
 - [X] Shell completion
