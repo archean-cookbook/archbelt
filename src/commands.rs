@@ -53,6 +53,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
         }
         let bp_string = std::fs::read_to_string(bp_path).unwrap();
         let blueprint: Blueprint = serde_json::from_str(&bp_string).unwrap();
+
         let mut files: Vec<XcFile> = vec![];
         blueprint.components_with_hdd().iter().for_each(|c| {
             let hdd = c.with_hdd().ok().unwrap();
@@ -60,6 +61,11 @@ pub fn yank_xenon_code(args: &ArgMatches) {
                 files.push(f.clone());
             });
         });
+
+        if files.is_empty() {
+            println!("🚨 No files found! 🚨");
+            std::process::exit(0);
+        }
 
         // For each XcFile, create the file on disk and write the plain_code to it
         files.iter().for_each(|f| {
