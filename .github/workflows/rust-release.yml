@@ -2,7 +2,7 @@ name: Rust Release
 
 on:
   push:
-    branches: [ "main", "development" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main", "development" ]
 
@@ -32,6 +32,7 @@ jobs:
         run: cargo test --verbose
 
   build:
+    if: contains(github.ref, 'main')
     strategy:
       fail-fast: false
       matrix:
