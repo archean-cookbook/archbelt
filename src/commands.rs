@@ -1,8 +1,11 @@
+use crate::archean::json::*;
+use crate::descriptors;
+use crate::statics::{COMMAND, DESCRIPTION, VERSION};
+
 use std::path::{Path, PathBuf};
 use clap::{ArgMatches, Command};
 use clap_complete::{generate, Generator, Shell};
-use crate::descriptors;
-use crate::statics::{COMMAND, DESCRIPTION, VERSION};
+use steamlocate::SteamDir;
 
 pub fn app() -> Command {
     // Initialize the main command, `archbelt`
@@ -31,9 +34,17 @@ pub fn yank_xenon_code(args: &ArgMatches) {
     if let Some(bp) = args.get_many::<String>("BLUEPRINT") {
         let blueprint = format!("{:?}.json", bp);
         let bp_path = get_blueprint_path(blueprint);
-        println!("{:?}", bp_path);
+        // TODO: move to private func
+        if !bp_path.exists() {
+            println!("🚨 Blueprint not found! 🚨");
+            std::process::exit(1);
+        }
+        let bp = std::fs::read_to_string(bp_path).unwrap();
+        let blueprint: Blueprint = serde_json::from_str(&bp).unwrap();
+        println!("{:?}", blueprint);
     }
 }
+
 pub fn generate_shell_completion(args: &ArgMatches) {
     if let Some(shell) = args.get_one::<Shell>("target") {
         generate_completions(*shell, &mut app());
@@ -58,7 +69,6 @@ fn get_blueprint_path(bp: String) -> PathBuf {
 }
 
 pub fn get_archean_path() -> PathBuf {
-    use steamlocate::SteamDir;
     let mut steam_dirs = SteamDir::locate().unwrap();
     let archean = steam_dirs.app(&2941660);
     match archean {
