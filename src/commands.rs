@@ -39,8 +39,9 @@ pub fn yank_xenon_code(args: &ArgMatches) {
             println!("🚨 Blueprint not found! 🚨");
             std::process::exit(1);
         }
-        let bp = std::fs::read_to_string(bp_path).unwrap();
-        let blueprint: Blueprint = serde_json::from_str(&bp).unwrap();
+        let bp_string = std::fs::read_to_string(bp_path).unwrap();
+        println!("{:?}", bp_string);
+        let blueprint: Blueprint = serde_json::from_str(&bp_string).unwrap();
         println!("{:?}", blueprint);
     }
 }
