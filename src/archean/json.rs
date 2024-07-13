@@ -1,3 +1,4 @@
+use std::io::Error;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -11,7 +12,7 @@ pub struct Blueprint {
     pub box_min: BoxMin,
     #[serde(rename = "box_size")]
     pub box_size: BoxSize,
-    pub data: Data,
+    pub data: RootData,
     pub datetime: String,
     pub mass: f64,
     #[serde(rename = "type")]
@@ -45,7 +46,7 @@ pub struct BoxSize {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Data {
+pub struct RootData {
     pub blocks: Vec<Block>,
     pub components: Vec<Component>,
     #[serde(rename = "composite_builds")]
@@ -92,7 +93,7 @@ pub struct Block {
 pub struct Component {
     pub alias: String,
     pub colors: Vec<i64>,
-    pub data: Data2,
+    pub data: ComponentData,
     pub module: String,
     pub occupancies: Vec<Occupancy>,
     pub orientation: Orientation,
@@ -101,9 +102,26 @@ pub struct Component {
     pub type_field: String,
 }
 
+#[derive(Debug, Clone)]
+struct JsonError;
+
+impl Component {
+    pub fn with_hdd(&self) -> Result<Hdd, JsonError> {
+        if let Some(hdd) = &self.data.hdd {
+            Ok(hdd.clone())
+        } else {
+            Err(JsonError)
+        }
+    }
+    fn has_data_storage(&self) -> bool {
+        self.data.has_hdd()
+    }
+}
+
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Data2 {
+pub struct ComponentData {
     pub angle: Option<f64>,
     pub max_power: Option<f64>,
     pub rgb: Option<Rgb>,
@@ -116,6 +134,12 @@ pub struct Data2 {
     pub receive_frequency: Option<String>,
     pub transmit_data: Option<String>,
     pub transmit_frequency: Option<String>,
+}
+
+impl ComponentData {
+    fn has_hdd(&self) -> bool {
+        self.hdd.is_some()
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
