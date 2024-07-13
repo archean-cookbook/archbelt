@@ -36,6 +36,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
         let bp_path = get_blueprint_path(blueprint);
         // TODO: move to private func
         if !bp_path.exists() {
+            println!("{:?}", bp_path);
             println!("🚨 Blueprint not found! 🚨");
             std::process::exit(1);
         }
