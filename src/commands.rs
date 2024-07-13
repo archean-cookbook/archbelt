@@ -28,7 +28,7 @@ pub fn match_commands(sub_command: &str, args: &ArgMatches) {
 }
 
 pub fn yank_xenon_code(args: &ArgMatches) {
-    if let Some(bp) = args.get_many::<String>("blueprint") {
+    if let Some(bp) = args.get_many::<String>("BLUEPRINT") {
         let blueprint = format!("{:?}.json", bp);
         let bp_path = get_blueprint_path(blueprint);
         println!("{:?}", bp_path);
