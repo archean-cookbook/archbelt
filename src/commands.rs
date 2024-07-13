@@ -40,7 +40,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
             bp_name.push(name);
         });
         let bp_name = bp_name.join(" ");
-        let blueprint = format!("{:?}.json", bp_name);
+        let blueprint = format!("{}.json", bp_name);
         let bp_path = get_blueprint_path(blueprint);
         // TODO: move to private func
         if !bp_path.exists() {
