@@ -1,10 +1,12 @@
 [package]
 name = "archbelt"
-version = "0.1.3"
+version = "0.2.0"
 description = "A tool to work with Archean blueprints and XenonCode modules"
 license = "MIT"
 authors = ["Michael K <tsalaroth@gmail.com>"]
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/archean-cookbook/archbelt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
