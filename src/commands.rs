@@ -111,12 +111,11 @@ fn yank_from_config(config: YankConfig) {
         Ok(bp) => {
             // TODO: unwrap
             let blueprint: Blueprint = serde_json::from_str(bp.as_str()).unwrap();
-            let mut files: Vec<XcFile> = vec![];
+            let mut files: Vec<XcFileMeta> = vec![];
 
             blueprint.components_with_hdd().iter().for_each(|c| {
                 // TODO: unwrap
-                let hdd = c.with_hdd().ok().unwrap();
-                hdd.xc_files().iter().for_each(|f| {
+                c.xc_files().iter().for_each(|f| {
                     files.push(f.clone());
                 });
             });
@@ -137,7 +136,14 @@ fn yank_from_config(config: YankConfig) {
 
             // For each XcFile, create the file on disk and write the plain_code to it
             files.iter().for_each(|f| {
-                fs::write(f.name.clone(), f.plain_code.clone()).expect("Unable to write file");
+                // TODO: consider this...
+                // let file_name = if config.folder {
+                //     format!("{}/{}", f.component(), f.file_name())
+                // } else {
+                //     f.file_name().to_string()
+                // };
+
+                fs::write(f.file_name(), f.file_content()).expect("Unable to write file");
             });
 
             // pop back to current_dir

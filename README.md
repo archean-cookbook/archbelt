@@ -46,6 +46,9 @@ Options:
   -h, --help  Print help
 ```
 
+#### Known Issues
+- If there is not an alias, the --folder option will save the component's module name instead of the alias name. This means that if there are say, several computers, they will all be saved in the `ARCHEAN_computer` folder. This could lead to files being overwritten.
+
 
 #### Planned
 Later, this will have a -w flag to specify "watch" mode, where it will watch the blueprint directory for changes and automatically yank the files, placing them in folders named after the blueprint(s). This will be useful for collections that update while you're in the game.
