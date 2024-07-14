@@ -107,17 +107,23 @@ pub struct Component {
     pub type_field: String,
 }
 
-#[derive(Debug, Clone)]
-pub struct JsonError;
-
 impl Component {
-    pub fn with_hdd(&self) -> Result<Hdd, JsonError> {
-        if let Some(hdd) = &self.data.hdd {
-            Ok(hdd.clone())
+    pub fn name(&self) -> &str {
+        if self.alias.is_empty() {
+            &self.module
         } else {
-            Err(JsonError)
+            &self.alias
         }
     }
+
+    pub fn xc_files(&self) -> Vec<XcFileMeta> {
+        if let Some(hdd) = &self.data.hdd {
+            hdd.xc_files().iter().map(|f| XcFileMeta::new(self.name().to_string(), f.clone())).collect()
+        } else {
+            vec![]
+        }
+    }
+
     fn has_data_storage(&self) -> bool {
         self.data.has_hdd()
     }
@@ -176,6 +182,33 @@ pub struct XcFile {
     pub name: String,
     #[serde(rename = "plain_code")]
     pub plain_code: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct XcFileMeta {
+    component_name: String,
+    inner: XcFile,
+}
+
+impl XcFileMeta {
+    pub fn new(component_name: String, inner: XcFile) -> Self {
+        XcFileMeta {
+            component_name,
+            inner,
+        }
+    }
+
+    pub fn component(&self) -> &str {
+        &self.component_name
+    }
+
+    pub fn file_name(&self) -> &str {
+        &self.inner.name
+    }
+
+    pub fn file_content(&self) -> &str {
+        &self.inner.plain_code
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
