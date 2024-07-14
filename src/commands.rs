@@ -142,8 +142,8 @@ fn yank_from_config(config: YankConfig) {
                 // } else {
                 //     f.file_name().to_string()
                 // };
-
-                fs::write(f.file_name(), f.file_content()).expect("Unable to write file");
+                let file_name = format!("{}/{}", f.component(), f.file_name());
+                fs::write(file_name, f.file_content()).expect("Unable to write file");
             });
 
             // pop back to current_dir
