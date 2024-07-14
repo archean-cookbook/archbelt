@@ -7,6 +7,9 @@ authors = ["Michael K <tsalaroth@gmail.com>"]
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/archean-cookbook/archbelt"
+exclude = [
+    ".github/workflows/rust-release.yml"
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
