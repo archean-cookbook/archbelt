@@ -143,6 +143,10 @@ fn yank_from_config(config: YankConfig) {
                 //     f.file_name().to_string()
                 // };
                 let file_name = format!("{}/{}", f.component(), f.file_name());
+                // create the folder if it doesn't exist
+                let folder = Path::new(&file_name).parent().unwrap();
+                fs::create_dir_all(folder).expect("Unable to create folder");
+                // save the file
                 fs::write(file_name, f.file_content()).expect("Unable to write file");
             });
 
