@@ -32,7 +32,23 @@ Options:
 
 ### Yank
 
-*Coming Soon*
+Note, `[BLUEPRINT]...` is the name of the blueprint without the `.json` extension, and no quotes. This will use the exact name of the blueprint saved in-game, letting you Ctrl-C to copy the name just before you save it, then paste it into the command line.
+
+```
+Yank code files from a blueprint
+
+Usage: archbelt yank [BLUEPRINT]...
+
+Arguments:
+  [BLUEPRINT]...  name of the blueprint without .json
+
+Options:
+  -h, --help  Print help
+```
+
+
+#### Planned
+Later, this will have a -w flag to specify "watch" mode, where it will watch the blueprint directory for changes and automatically yank the files, placing them in folders named after the blueprint(s). This will be useful for collections that update while you're in the game.
 
 ### Shell Completion
 ```
