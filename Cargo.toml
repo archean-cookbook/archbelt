@@ -1,6 +1,6 @@
 [package]
 name = "archbelt"
-version = "0.1.2"
+version = "0.1.3"
 description = "A tool to work with Archean blueprints and XenonCode modules"
 license = "MIT"
 authors = ["Michael K <tsalaroth@gmail.com>"]
