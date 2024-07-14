@@ -106,7 +106,7 @@ fn get_blueprint_object(path: PathBuf) -> Result<String, CommandError> {
 
 fn yank_from_config(config: YankConfig) {
     // TODO: handle watch and folder options
-    let blueprint = get_blueprint_object(config.file_name);
+    let blueprint = get_blueprint_object(config.file_name.clone());
     match blueprint {
         Ok(bp) => {
             // TODO: unwrap
@@ -126,10 +126,22 @@ fn yank_from_config(config: YankConfig) {
                 std::process::exit(0);
             }
 
+            // TODO: ugh
+            let folder_name: String = config.file_name.clone().file_stem().unwrap().to_str().unwrap().to_string();
+            let current_dir = std::env::current_dir().unwrap();
+
+            if config.folder {
+                fs::create_dir_all(folder_name.clone()).expect("Unable to create folder");
+                std::env::set_current_dir(folder_name.clone()).expect("Unable to set current directory");
+            }
+
             // For each XcFile, create the file on disk and write the plain_code to it
             files.iter().for_each(|f| {
                 fs::write(f.name.clone(), f.plain_code.clone()).expect("Unable to write file");
             });
+
+            // pop back to current_dir
+            std::env::set_current_dir(current_dir).expect("Unable to set current directory");
         }
         Err(_) => {
             println!("🚨 Blueprint not found! 🚨");
