@@ -37,21 +37,19 @@ Note, `[BLUEPRINT]...` is the name of the blueprint without the `.json` extensio
 ```
 Yank code files from a blueprint
 
-Usage: archbelt yank [BLUEPRINT]...
+Usage: archbelt yank [OPTIONS] [BLUEPRINT]...
 
 Arguments:
   [BLUEPRINT]...  name of the blueprint without .json
 
 Options:
-  -h, --help  Print help
+  -f, --folder  yank blueprint files to folder named after blueprint
+  -w, --watch   watch for changes to the blueprint; yanks files on change [not implemented]
+  -h, --help    Print help
 ```
 
-#### Known Issues
-- If there is not an alias, the --folder option will save the component's module name instead of the alias name. This means that if there are say, several computers, they will all be saved in the `ARCHEAN_computer` folder. This could lead to files being overwritten.
-
-
 #### Planned
-Later, this will have a -w flag to specify "watch" mode, where it will watch the blueprint directory for changes and automatically yank the files, placing them in folders named after the blueprint(s). This will be useful for collections that update while you're in the game.
+Later, this will have a -w flag to specify "watch" mode, where it will watch the blueprint directory for changes and automatically yank the files, placing them in folders named after the blueprint(s). This will be useful for collections that update while you're in the game, and should work well paired with `--folder`.
 
 ### Shell Completion
 ```
@@ -64,3 +62,6 @@ Options:
       --shell <target>  [possible values: bash, elvish, fish, powershell, zsh]
   -h, --help            Print help
 ```
+
+## Known Issues
+- When creating the files with `yank`, `archbelt` will create a folder for each component that has an HDD in the blueprint.  If there is an alias, it will use that for the folder name; if there isn't, it will use the module type's name instead. This means that if there are say, several computers, they will all be saved in the `ARCHEAN_computer` folder. This could lead to files being overwritten.
