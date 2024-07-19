@@ -40,18 +40,14 @@ pub fn watch_event<P: AsRef<Path>>(path: P) -> NotifyResult<()> {
 }
 
 fn handle_event(event: &DebouncedEvent) {
-    match event.kind {
-        notify::EventKind::Modify(_) => {
-            let blueprint_name = &event.paths[0];
-            println!("Blueprint file changed: {:?}, yanking..", blueprint_name);
-            yank_from_config(YankConfig{
-                file_name: blueprint_name.to_path_buf(),
-                folder: true,
-                watch: WatchState::Watching, // we are already watching from the yank context
-                disable_collate: false
-            });
-        }
-        // TODO: handle other event types
-        _ => {}
+    if event.kind.is_modify() {
+        let blueprint_name = event.paths.get(0).unwrap();
+        println!("Blueprint file changed: {:?}, yanking..", blueprint_name);
+        yank_from_config(YankConfig{
+            file_name: blueprint_name.to_path_buf(),
+            folder: true,
+            watch: WatchState::Watching, // we are already watching from the yank context
+            disable_collate: false
+        });
     }
 }
