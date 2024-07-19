@@ -14,7 +14,7 @@ pub(crate) fn complete_command() -> Command {
 pub(crate) fn yank_command() -> Command {
     Command::new("yank")
         .about("Yank code files from a blueprint")
-        .arg(arg!(-x --no-collate "do not collate the files by component")
+        .arg(arg!(-x --"no-collate" "do not collate the files by component")
             .action(ArgAction::SetTrue))
         .arg(arg!(-f --folder "yank blueprint files to folder named after blueprint")
             .action(ArgAction::SetTrue))
