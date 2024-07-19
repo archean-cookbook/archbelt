@@ -1,9 +1,8 @@
-mod commands;
-mod statics;
 mod archean;
-mod descriptors;
+mod command;
+mod statics;
 
-use commands::*;
+use command::prelude::*;
 
 fn main() {
     let matches = app().get_matches();

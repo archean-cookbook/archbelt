@@ -1,6 +1,78 @@
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
+impl Blueprint {
+    pub fn components_with_hdd(&self) -> Vec<Component> {
+        self.data.components.iter().filter(|c| c.has_data_storage()).cloned().collect()
+    }
+}
+
+impl Component {
+    pub fn name(&self) -> String {
+        if self.alias.is_none() {
+            self.module.to_string()
+        } else {
+            let has_alias = !self.alias.clone().unwrap().as_str().is_empty();
+            if has_alias {
+                format!("{}", self.alias.clone().unwrap())
+            } else {
+                self.module.to_string()
+            }
+        }
+    }
+
+    pub fn xc_files(&self) -> Vec<XcFileMeta> {
+        if let Some(hdd) = &self.data.hdd {
+            hdd.xc_files().iter().map(|f| XcFileMeta::new(self.name().to_string(), f.clone())).collect()
+        } else {
+            vec![]
+        }
+    }
+
+    fn has_data_storage(&self) -> bool {
+        self.data.has_hdd()
+    }
+}
+
+impl ComponentData {
+    fn has_hdd(&self) -> bool {
+        self.hdd.is_some()
+    }
+}
+
+impl Hdd {
+    pub fn xc_files(&self) -> Vec<XcFile> {
+        self.xc_files.clone()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct XcFileMeta {
+    component_name: String,
+    inner: XcFile,
+}
+
+impl XcFileMeta {
+    pub fn new(component_name: String, inner: XcFile) -> Self {
+        XcFileMeta {
+            component_name,
+            inner,
+        }
+    }
+
+    pub fn component(&self) -> &str {
+        &self.component_name
+    }
+
+    pub fn file_name(&self) -> &str {
+        &self.inner.name
+    }
+
+    pub fn file_content(&self) -> &str {
+        &self.inner.plain_code
+    }
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Blueprint {
@@ -17,12 +89,6 @@ pub struct Blueprint {
     #[serde(rename = "type")]
     pub type_field: String,
     pub version: i64,
-}
-
-impl Blueprint {
-    pub fn components_with_hdd(&self) -> Vec<Component> {
-        self.data.components.iter().filter(|c| c.has_data_storage()).cloned().collect()
-    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -55,10 +121,10 @@ pub struct RootData {
     pub blocks: Vec<Block>,
     pub components: Vec<Component>,
     #[serde(rename = "composite_builds")]
-    pub composite_builds: Vec<Value>,
+    pub composite_builds: Vec<CompositeBuild>,
     pub doors: Vec<Value>,
     pub frames: Vec<Value>,
-    pub labels: Vec<Label>,
+    pub labels: Vec<Value>,
     pub pipes: Vec<Pipe>,
     #[serde(rename = "symmetry_axis")]
     pub symmetry_axis: i64,
@@ -96,7 +162,7 @@ pub struct Block {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Component {
-    pub alias: String,
+    pub alias: Option<String>,
     pub colors: Vec<i64>,
     pub data: ComponentData,
     pub module: String,
@@ -107,50 +173,96 @@ pub struct Component {
     pub type_field: String,
 }
 
-impl Component {
-    pub fn name(&self) -> &str {
-        if self.alias.is_empty() {
-            &self.module
-        } else {
-            &self.alias
-        }
-    }
-
-    pub fn xc_files(&self) -> Vec<XcFileMeta> {
-        if let Some(hdd) = &self.data.hdd {
-            hdd.xc_files().iter().map(|f| XcFileMeta::new(self.name().to_string(), f.clone())).collect()
-        } else {
-            vec![]
-        }
-    }
-
-    fn has_data_storage(&self) -> bool {
-        self.data.has_hdd()
-    }
-}
-
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ComponentData {
+    pub color: Option<Color>,
+    #[serde(default)]
+    pub elements: Vec<Element>,
+    pub metallic: Option<i64>,
+    pub roughness: Option<i64>,
+    #[serde(rename = "size_x")]
+    pub size_x: Option<i64>,
+    #[serde(rename = "size_y")]
+    pub size_y: Option<i64>,
+    pub version: Option<i64>,
+    pub charged: Option<bool>,
     pub angle: Option<f64>,
     pub max_power: Option<f64>,
     pub rgb: Option<Rgb>,
+    pub smooth_controls: Option<bool>,
+    pub grip: Option<f64>,
+    pub mudguard: Option<bool>,
+    pub suspension: Option<f64>,
     pub hdd: Option<Hdd>,
     pub program: Option<String>,
-    pub version: Option<i64>,
-    pub charged: Option<bool>,
-    pub contents: Option<Contents>,
-    pub state: Option<bool>,
-    pub receive_frequency: Option<String>,
-    pub transmit_data: Option<String>,
-    pub transmit_frequency: Option<String>,
+    pub blocks: Option<Vec<Block>>,
+    pub components: Option<Vec<Component>>,
+    #[serde(rename = "composite_builds")]
+    #[serde(default)]
+    pub composite_builds: Vec<Value>,
+    #[serde(default)]
+    pub doors: Vec<Value>,
+    #[serde(default)]
+    pub frames: Vec<Value>,
+    #[serde(default)]
+    pub labels: Vec<Value>,
+    #[serde(default)]
+    pub pipes: Vec<Value>,
+    #[serde(rename = "symmetry_axis")]
+    pub symmetry_axis: Option<i64>,
+    pub acceleration: Option<f64>,
+    pub input_value: Option<f64>,
+    pub max_speed: Option<f64>,
+    pub servo_mode: Option<bool>,
 }
 
-impl ComponentData {
-    fn has_hdd(&self) -> bool {
-        self.hdd.is_some()
-    }
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Color {
+    pub a: i64,
+    pub b: i64,
+    pub g: i64,
+    pub r: i64,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Element {
+    pub base_color: BaseColor,
+    pub base_metallic: i64,
+    pub base_roughness: i64,
+    pub main_color: MainColor,
+    pub main_metallic: i64,
+    pub main_roughness: i64,
+    #[serde(rename = "pos_x")]
+    pub pos_x: i64,
+    #[serde(rename = "pos_y")]
+    pub pos_y: i64,
+    #[serde(rename = "size_x")]
+    pub size_x: i64,
+    #[serde(rename = "size_y")]
+    pub size_y: i64,
+    #[serde(rename = "type")]
+    pub type_field: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BaseColor {
+    pub a: i64,
+    pub b: i64,
+    pub g: i64,
+    pub r: i64,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MainColor {
+    pub a: i64,
+    pub b: i64,
+    pub g: i64,
+    pub r: i64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -170,50 +282,12 @@ pub struct Hdd {
     pub xc_files: Vec<XcFile>,
 }
 
-impl Hdd {
-    pub fn xc_files(&self) -> Vec<XcFile> {
-        self.xc_files.clone()
-    }
-}
-
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct XcFile {
     pub name: String,
     #[serde(rename = "plain_code")]
     pub plain_code: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct XcFileMeta {
-    component_name: String,
-    inner: XcFile,
-}
-
-impl XcFileMeta {
-    pub fn new(component_name: String, inner: XcFile) -> Self {
-        XcFileMeta {
-            component_name,
-            inner,
-        }
-    }
-
-    pub fn component(&self) -> &str {
-        &self.component_name
-    }
-
-    pub fn file_name(&self) -> &str {
-        &self.inner.name
-    }
-
-    pub fn file_content(&self) -> &str {
-        &self.inner.plain_code
-    }
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Contents {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -258,55 +332,9 @@ pub struct Position {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Label {
-    #[serde(rename = "align_center")]
-    pub align_center: i64,
-    #[serde(rename = "dir_x")]
-    pub dir_x: i64,
-    #[serde(rename = "dir_y")]
-    pub dir_y: i64,
-    #[serde(rename = "dir_z")]
-    pub dir_z: i64,
-    pub metallic: i64,
-    #[serde(rename = "panel_color")]
-    pub panel_color: PanelColor,
-    pub position: Position2,
-    pub roughness: i64,
-    pub size: f64,
-    pub text: String,
-    #[serde(rename = "text_color")]
-    pub text_color: TextColor,
-    #[serde(rename = "up_x")]
-    pub up_x: i64,
-    #[serde(rename = "up_y")]
-    pub up_y: i64,
-    #[serde(rename = "up_z")]
-    pub up_z: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PanelColor {
-    pub a: i64,
-    pub b: i64,
-    pub g: i64,
-    pub r: i64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Position2 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TextColor {
-    pub b: i64,
-    pub g: i64,
-    pub r: i64,
+pub struct CompositeBuild {
+    pub component: i64,
+    pub slave_build_id: i64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

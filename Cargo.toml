@@ -1,6 +1,6 @@
 [package]
 name = "archbelt"
-version = "0.2.0"
+version = "0.2.1"
 description = "A tool to work with Archean blueprints and XenonCode modules"
 license = "MIT"
 authors = ["Michael K <tsalaroth@gmail.com>"]
@@ -16,10 +16,12 @@ exclude = [
 [dependencies]
 clap = "4.5"
 clap_complete = "4.5"
-steamlocate = { version = "1.2.1", features = ["steamid_ng"] }
+steamlocate = "2.0.0-beta.2"
 serde_derive = "1.0.204"
 serde_json = "1.0.120"
 serde = { version = "1", features = ["derive"] }
+notify = "6"
+notify-debouncer-full = "0.3.1"
 
 [profile.release]
 strip = true
