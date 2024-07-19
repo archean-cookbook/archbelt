@@ -1,5 +1,6 @@
 mod yank;
 mod descriptors;
+mod watch;
 
 use clap::{ArgMatches, Command, Error};
 use clap_complete::{generate, Generator, Shell};
@@ -18,22 +19,34 @@ pub mod prelude {
             .version(VERSION)
             .about(DESCRIPTION)
             .subcommand(descriptors::yank_command())
+            .subcommand(descriptors::watch_command())
             .subcommand(descriptors::complete_command())
     }
 
     pub fn match_commands(sub_command: &str, args: &ArgMatches) {
-    match sub_command {
-        "complete" => {
-            generate_shell_completion(args);
-        }
-        "yank" => {
-            yank::yank_xenon_code(args);
-        }
-        _ => {
-            app().print_long_help().unwrap();
+        match sub_command {
+            "complete" => {
+                generate_shell_completion(args);
+            }
+            "yank" => {
+                yank::yank_xenon_code(args);
+            }
+            "watch" => {
+                watch::watch_blueprints(args);
+            }
+            _ => {
+                app().print_long_help().unwrap();
+            }
         }
     }
-}
+
+    pub fn get_archean_path() -> Result<PathBuf, CommandError> {
+        let steam_dir = SteamDir::locate().expect("could not find a steam library");
+        let (archean, lib) = steam_dir
+            .find_app(ARCHEAN_STEAM_ID)?
+            .expect("🚨 Archean installed via Steam is required! 🚨");
+        Ok(lib.resolve_app_dir(&archean))
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -81,7 +94,7 @@ fn generate_completions<G: Generator>(gen: G, cmd: &mut Command) {
 
 fn get_blueprint_path(bp: String) -> Result<PathBuf, CommandError> {
     // Defaults to {STEAM_APPS}\Archean\Archean-data\client\blueprints
-    Ok(Path::new(&get_archean_path()?)
+    Ok(Path::new(&prelude::get_archean_path()?)
         .join("Archean-data")
         .join("client")
         .join("blueprints")
@@ -105,12 +118,4 @@ fn extract_filename(for_id: String, matches: &ArgMatches) -> Result<PathBuf, Com
         }
     };
     Ok(file_name?)
-}
-
-fn get_archean_path() -> Result<PathBuf, CommandError> {
-    let steam_dir = SteamDir::locate().expect("could not find a steam library");
-    let (archean, lib) = steam_dir
-        .find_app(ARCHEAN_STEAM_ID)?
-        .expect("🚨 Archean installed via Steam is required! 🚨");
-    Ok(lib.resolve_app_dir(&archean))
 }

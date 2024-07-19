@@ -3,6 +3,7 @@ mod command;
 mod statics;
 
 use command::prelude::*;
+
 fn main() {
     let matches = app().get_matches();
     let sub_command_details = matches.subcommand();

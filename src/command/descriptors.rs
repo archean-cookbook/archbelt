@@ -27,3 +27,12 @@ pub(crate) fn yank_command() -> Command {
                 .trailing_var_arg(true),
         )
 }
+
+pub(crate) fn watch_command() -> Command {
+    Command::new("watch")
+        .about("watch for changes to blueprint file(s); will yank on change")
+        .arg(arg!(-x --"no-collate" "do not collate the files by component (use at own risk; this can get very messy..)")
+            .action(ArgAction::SetTrue))
+        .arg(arg!([TARGET] "target blueprint file (if none given, watches all)")
+            .required(false))
+}

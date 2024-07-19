@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 use clap::{ArgMatches, Error, FromArgMatches};
 use std::fs;
+use std::io::Write;
 use crate::archean::json::{Blueprint, XcFileMeta};
 use crate::command;
 
@@ -53,7 +54,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
 }
 
 fn yank_from_config(config: YankConfig) {
-    // TODO: handle watch
+    // TODO: handle watch loop
     let blueprint = command::get_blueprint_object(config.file_name.clone());
     match blueprint {
         Ok(bp) => {
@@ -98,7 +99,14 @@ fn yank_from_config(config: YankConfig) {
                         let folder = Path::new(&file_name).parent().expect(format!("could not create parent folder for {}", file_name.to_string()).as_str());
                         fs::create_dir_all(folder).expect("Unable to create folder");
                         // save the file
-                        fs::write(file_name.clone(), f.file_content()).expect(format!("Unable to write file {}", file_name).as_str());
+                        let mut fh = fs::OpenOptions::new()
+                            .create(true)
+                            .write(true)
+                            .truncate(true)
+                            .open(file_name.clone())
+                            .expect(format!("Unable to create file {}", file_name.clone()).as_str());
+
+                        fh.write(f.file_content().as_bytes()).expect(format!("Unable to write to file: {}", file_name.clone()).as_str());
                     });
 
                     // pop back to current_dir
