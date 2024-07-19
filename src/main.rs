@@ -1,10 +1,9 @@
-mod commands;
-mod statics;
 mod archean;
+mod command;
 mod descriptors;
+mod statics;
 
-use commands::*;
-
+use command::prelude::*;
 fn main() {
     let matches = app().get_matches();
     let sub_command_details = matches.subcommand();
