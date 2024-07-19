@@ -17,16 +17,19 @@ pub fn watch_blueprints(args: &ArgMatches) {
 }
 
 fn watch_event<P: AsRef<Path>>(path: P) -> Result<()> {
+    println!("Watching {:?}", path.as_ref());
     let (tx, rx) = std::sync::mpsc::channel();
 
+    println!("initiating debouncer");
     let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx)?;
     debouncer.watcher().watch(path.as_ref(), RecursiveMode::Recursive)?;
 
+    println!("waiting for events");
     // print all events and errors
     for result in rx {
         match result {
-            Ok(events) => events.iter().for_each(|event| log::info!("{event:?}")),
-            Err(errors) => errors.iter().for_each(|error| log::error!("{error:?}")),
+            Ok(events) => events.iter().for_each(|event| println!("{event:?}")),
+            Err(errors) => errors.iter().for_each(|error| println!("{error:?}")),
         }
     }
 
