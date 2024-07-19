@@ -74,9 +74,14 @@ pub fn yank_from_config(config: YankConfig) {
                         });
                     });
 
-                    if files.is_empty() && !config.watch {
-                        println!("🚨 No files found! 🚨");
-                        std::process::exit(0);
+                    if files.is_empty() {
+                        if !config.watch {
+                            println!("🚨 No files found! 🚨");
+                            std::process::exit(0);
+                        } else {
+                            println!("Mo files found in event, skipping..");
+                            return; // exit the function if we are watching
+                        }
                     }
 
                     let folder_name: String = config.file_name.clone()
