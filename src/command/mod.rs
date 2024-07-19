@@ -48,6 +48,13 @@ pub mod prelude {
         Ok(lib.resolve_app_dir(&archean))
     }
 
+    #[derive(Debug, Clone)]
+    pub enum WatchState {
+        Requested,
+        Watching,
+        Disabled
+    }
+
     pub use super::yank::yank_from_config;
     pub use super::yank::YankConfig;
 }

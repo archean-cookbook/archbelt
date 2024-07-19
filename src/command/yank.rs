@@ -4,12 +4,13 @@ use std::fs;
 use std::io::Write;
 use crate::archean::json::{Blueprint, XcFileMeta};
 use crate::command;
+use crate::command::prelude::WatchState;
 use crate::command::watch::watch_event;
 
 pub struct YankConfig {
     pub(crate) file_name: PathBuf,
     pub(crate) folder: bool,
-    pub(crate) watch: bool,
+    pub(crate) watch: WatchState,
     pub(crate) disable_collate: bool
 }
 
@@ -20,10 +21,16 @@ impl FromArgMatches for YankConfig {
         let watch_switch = matches.get_one::<bool>("watch").unwrap_or(&false);
         let collate_switch = matches.get_one::<bool>("no-collate").unwrap_or(&false);
 
+        let watch_state = if *watch_switch {
+            WatchState::Requested
+        } else {
+            WatchState::Disabled
+        };
+
         Ok(YankConfig {
             file_name,
             folder: *folder_switch,
-            watch: *watch_switch,
+            watch: watch_state,
             disable_collate: *collate_switch
         })
     }
@@ -35,7 +42,13 @@ impl FromArgMatches for YankConfig {
 
         self.file_name = file_name;
         self.folder = *folder_switch;
-        self.watch = *watch_switch;
+        match self.watch {
+            _ => {
+                if !watch_switch {
+                    self.watch = WatchState::Disabled;
+                }
+            }
+        }
 
         Ok(())
     }
@@ -45,10 +58,14 @@ pub fn yank_xenon_code(args: &ArgMatches) {
     let config = YankConfig::from_arg_matches(args);
     match config {
         Ok(config) => {
-            if config.watch {
-                watch_event(config.file_name.clone()).expect("Could not watch blueprint path");
-            } else {
-                yank_from_config(config);
+            match config.watch {
+                WatchState::Requested | WatchState::Watching => {
+                    watch_event(config.file_name.clone()).expect("Could not watch blueprint path");
+                    return
+                }
+                _ => {
+                    yank_from_config(config);
+                }
             }
         }
         Err(_) => {
@@ -75,12 +92,15 @@ pub fn yank_from_config(config: YankConfig) {
                     });
 
                     if files.is_empty() {
-                        if !config.watch {
-                            println!("🚨 No files found! 🚨");
-                            std::process::exit(0);
-                        } else {
-                            println!("Mo files found in event, skipping..");
-                            return; // exit the function if we are watching
+                        match config.watch {
+                            WatchState::Requested | WatchState::Watching => {
+                                println!("Mo files found in event, skipping..");
+                                return; // exit the function if we are watching
+                            }
+                            _ => {
+                                println!("🚨 No files found! 🚨");
+                                std::process::exit(0);
+                            }
                         }
                     }
 

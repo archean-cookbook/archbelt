@@ -44,11 +44,10 @@ fn handle_event(event: &DebouncedEvent) {
         notify::EventKind::Create(_) | notify::EventKind::Modify(_) => {
             let blueprint_name = &event.paths[0];
             println!("Blueprint file changed: {:?}, yanking..", blueprint_name);
-            // TODO: use args
             yank_from_config(YankConfig{
                 file_name: blueprint_name.to_path_buf(),
                 folder: true,
-                watch: false, // we are already watching from the yank context
+                watch: WatchState::Watching, // we are already watching from the yank context
                 disable_collate: false
             });
         }
