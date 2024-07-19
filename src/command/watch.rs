@@ -16,15 +16,11 @@ pub fn watch_blueprints(args: &ArgMatches) {
     watch_event(&archean_path).expect("Could not watch Archean blueprints path");
 }
 
-fn watch_event<P: AsRef<Path>>(path: P) -> Result<()> {
-    println!("Watching {:?}", path.as_ref());
+pub fn watch_event<P: AsRef<Path>>(path: P) -> Result<()> {
     let (tx, rx) = std::sync::mpsc::channel();
-
-    println!("initiating debouncer");
     let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx)?;
     debouncer.watcher().watch(path.as_ref(), RecursiveMode::Recursive)?;
-
-    println!("waiting for events");
+    println!("waiting for blueprint events");
     // print all events and errors
     for result in rx {
         match result {
@@ -43,8 +39,8 @@ fn handle_event(event: &DebouncedEvent) {
             // TODO: use args
             yank_from_config(YankConfig{
                 file_name: blueprint_name.to_path_buf(),
-                folder: false,
-                watch: false,
+                folder: true,
+                watch: false, // we are already watching from the yank context
                 disable_collate: false
             });
         }

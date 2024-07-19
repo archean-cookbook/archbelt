@@ -4,6 +4,7 @@ use std::fs;
 use std::io::Write;
 use crate::archean::json::{Blueprint, XcFileMeta};
 use crate::command;
+use crate::command::watch::watch_event;
 
 pub struct YankConfig {
     pub(crate) file_name: PathBuf,
@@ -44,7 +45,11 @@ pub fn yank_xenon_code(args: &ArgMatches) {
     let config = YankConfig::from_arg_matches(args);
     match config {
         Ok(config) => {
-            yank_from_config(config);
+            if config.watch {
+                watch_event(config.file_name.clone()).expect("Could not watch blueprint path");
+            } else {
+                yank_from_config(config);
+            }
         }
         Err(_) => {
             println!("🚨 Blueprint not found! 🚨");
