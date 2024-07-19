@@ -41,7 +41,7 @@ pub fn watch_event<P: AsRef<Path>>(path: P) -> NotifyResult<()> {
 
 fn handle_event(event: &DebouncedEvent) {
     match event.kind {
-        notify::EventKind::Create(_) | notify::EventKind::Modify(_) => {
+        notify::EventKind::Modify(_) => {
             let blueprint_name = &event.paths[0];
             println!("Blueprint file changed: {:?}, yanking..", blueprint_name);
             yank_from_config(YankConfig{
