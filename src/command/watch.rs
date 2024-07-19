@@ -5,7 +5,16 @@ use super::prelude::*;
 
 pub fn watch_blueprints(args: &ArgMatches) {
     // TODO: look at args
-    let mut watcher = notify::recommended_watcher(watch_event()).unwrap();
+    let mut watcher = notify::recommended_watcher(|res| {
+        match res {
+            Ok(event) => {
+                println!("{:?}", event);
+            }
+            _ => {
+                println!("Error watching folder");
+            }
+        }
+    }).unwrap();
     let archean_path = get_archean_path()
         .expect("Could not get Archean path")
         .join("Archean-data")
@@ -22,7 +31,7 @@ pub(crate) fn watch_event() -> impl FnMut(Result<Event>) {
     }
 }
 
-pub(crate) fn watch_file_event(file_name: String) -> impl FnMut(Result<Event>) {
+pub(crate) fn watch_file_event(blueprint_name: String) -> impl FnMut(Result<Event>) {
     move |event| {
         println!("{:?}", event);
     }
