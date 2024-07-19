@@ -2,7 +2,7 @@ use std::path::Path;
 use std::time::Duration;
 use clap::ArgMatches;
 use notify::{Event, Watcher, RecursiveMode, Result};
-use notify_debouncer_full::new_debouncer;
+use notify_debouncer_full::{DebouncedEvent, new_debouncer};
 use super::prelude::*;
 
 pub fn watch_blueprints(args: &ArgMatches) {
@@ -28,14 +28,14 @@ fn watch_event<P: AsRef<Path>>(path: P) -> Result<()> {
     // print all events and errors
     for result in rx {
         match result {
-            Ok(events) => events.iter().for_each(|event| println!("{event:?}")),
+            Ok(events) => events.iter().for_each(|event| handle_event(event)),
             Err(errors) => errors.iter().for_each(|error| println!("{error:?}")),
         }
     }
     Ok(())
 }
 
-fn handle_event(event: &Event) {
+fn handle_event(event: &DebouncedEvent) {
     match event.kind {
         notify::EventKind::Create(_) | notify::EventKind::Modify(_) => {
             let blueprint_name = &event.paths[0];
