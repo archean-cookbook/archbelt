@@ -20,7 +20,7 @@ fn watch_event<P: AsRef<Path>>(path: P) -> Result<()> {
     let (tx, rx) = std::sync::mpsc::channel();
 
     let mut debouncer = new_debouncer(Duration::from_secs(2), None, tx)?;
-    debouncer.watcher().watch(path.as_ref(), RecursiveMode::NonRecursive)?;
+    debouncer.watcher().watch(path.as_ref(), RecursiveMode::Recursive)?;
 
     // print all events and errors
     for result in rx {
