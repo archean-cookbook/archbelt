@@ -32,8 +32,25 @@ fn watch_event<P: AsRef<Path>>(path: P) -> Result<()> {
             Err(errors) => errors.iter().for_each(|error| println!("{error:?}")),
         }
     }
-
     Ok(())
+}
+
+fn handle_event(event: &Event) {
+    match event.kind {
+        notify::EventKind::Create(_) | notify::EventKind::Modify(_) => {
+            let blueprint_name = &event.paths[0];
+            println!("Blueprint file changed: {:?}, yanking..", blueprint_name);
+            // TODO: use args
+            yank_from_config(YankConfig{
+                file_name: blueprint_name.to_path_buf(),
+                folder: false,
+                watch: false,
+                disable_collate: false
+            });
+        }
+        // TODO: handle other event types
+        _ => {}
+    }
 }
 
 pub(crate) fn watch_file_event(blueprint_name: String) -> impl FnMut(Result<Event>) {

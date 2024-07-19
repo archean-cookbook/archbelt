@@ -5,11 +5,11 @@ use std::io::Write;
 use crate::archean::json::{Blueprint, XcFileMeta};
 use crate::command;
 
-pub(crate) struct YankConfig {
-    file_name: PathBuf,
-    folder: bool,
-    watch: bool,
-    disable_collate: bool
+pub struct YankConfig {
+    pub(crate) file_name: PathBuf,
+    pub(crate) folder: bool,
+    pub(crate) watch: bool,
+    pub(crate) disable_collate: bool
 }
 
 impl FromArgMatches for YankConfig {
@@ -53,7 +53,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
     }
 }
 
-fn yank_from_config(config: YankConfig) {
+pub fn yank_from_config(config: YankConfig) {
     // TODO: handle watch loop
     let blueprint = command::get_blueprint_object(config.file_name.clone());
     match blueprint {

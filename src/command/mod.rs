@@ -47,6 +47,9 @@ pub mod prelude {
             .expect("🚨 Archean installed via Steam is required! 🚨");
         Ok(lib.resolve_app_dir(&archean))
     }
+
+    pub use super::yank::yank_from_config;
+    pub use super::yank::YankConfig;
 }
 
 #[derive(Debug, Clone)]
