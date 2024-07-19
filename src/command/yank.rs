@@ -74,7 +74,7 @@ pub fn yank_from_config(config: YankConfig) {
                         });
                     });
 
-                    if files.is_empty() {
+                    if files.is_empty() && !config.watch {
                         println!("🚨 No files found! 🚨");
                         std::process::exit(0);
                     }
