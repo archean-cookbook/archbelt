@@ -43,9 +43,10 @@ Arguments:
   [BLUEPRINT]...  name of the blueprint without .json
 
 Options:
-  -f, --folder  yank blueprint files to folder named after blueprint
-  -w, --watch   watch for changes to the blueprint; yanks files on change [not implemented]
-  -h, --help    Print help
+  -x, --no-collate  do not collate the files by component
+  -f, --folder      yank blueprint files to folder named after blueprint
+  -w, --watch       watch for changes to the blueprint; yanks files on change
+  -h, --help        Print help
 ```
 
 #### Planned

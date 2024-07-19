@@ -1,6 +1,5 @@
 mod archean;
 mod command;
-mod descriptors;
 mod statics;
 
 use command::prelude::*;
