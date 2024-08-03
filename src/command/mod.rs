@@ -1,6 +1,7 @@
 mod yank;
 mod descriptors;
 mod watch;
+mod package;
 
 use clap::{ArgMatches, Command, Error};
 use clap_complete::{generate, Generator, Shell};
@@ -20,6 +21,7 @@ pub mod prelude {
             .about(DESCRIPTION)
             .subcommand(descriptors::yank_command())
             .subcommand(descriptors::watch_command())
+            // TODO: Add package_command
             .subcommand(descriptors::complete_command())
     }
 

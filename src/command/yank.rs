@@ -69,7 +69,7 @@ pub fn yank_xenon_code(args: &ArgMatches) {
             }
         }
         Err(_) => {
-            println!("🚨 Blueprint not found! 🚨");
+            eprintln!("🚨 Blueprint not found! 🚨");
             std::process::exit(1);
         }
     }
@@ -94,11 +94,11 @@ pub fn yank_from_config(config: YankConfig) {
                     if files.is_empty() {
                         match config.watch {
                             WatchState::Requested | WatchState::Watching => {
-                                println!("Mo files found in event, skipping..");
+                                eprintln!("Mo files found in event, skipping..");
                                 return; // exit the function if we are watching
                             }
                             _ => {
-                                println!("🚨 No files found! 🚨");
+                                eprintln!("🚨 No files found! 🚨");
                                 std::process::exit(0);
                             }
                         }
@@ -143,13 +143,13 @@ pub fn yank_from_config(config: YankConfig) {
                     std::env::set_current_dir(current_dir).expect("Unable to set current directory");
                 }
                 _ => {
-                    println!("🚨 Unable to parse blueprint! Please open an issue at https://github.com/archean-cookbook/archbelt/issues and attach your blueprint .json. 🚨");
+                    eprintln!("🚨 Unable to parse blueprint! Please open an issue at https://github.com/archean-cookbook/archbelt/issues and attach your blueprint .json. 🚨");
                     std::process::exit(0);
                 }
             }
         }
         Err(_) => {
-            println!("🚨 Blueprint not found! 🚨");
+            eprintln!("🚨 Blueprint not found! 🚨");
             std::process::exit(1);
         }
     }
