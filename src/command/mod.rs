@@ -13,12 +13,16 @@ use std::ops::Deref;
 use crate::statics::{ARCHEAN_STEAM_ID, COMMAND, DESCRIPTION, VERSION};
 
 pub mod prelude {
+    use clap::{arg, ArgAction};
     use super::*;
     pub fn app() -> Command {
         // Initialize the main command, `archbelt`
         Command::new(COMMAND)
             .version(VERSION)
             .about(DESCRIPTION)
+            .arg(arg!(--"blueprint-path" <PATH> "override path to blueprint files")
+                .num_args(1)
+                .required(false))
             .subcommand(descriptors::yank_command())
             .subcommand(descriptors::watch_command())
             // TODO: Add package_command
@@ -42,11 +46,28 @@ pub mod prelude {
         }
     }
 
-    pub fn get_archean_path() -> Result<PathBuf, CommandError> {
-        let steam_dir = SteamDir::locate().expect("could not find a steam library");
+    pub fn get_archean_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
+        let path = args.get_one::<PathBuf>("blueprint-path");
+        match path {
+            Some(path) => {
+                if path.exists() {
+                    Ok(path.clone())
+                } else {
+                    Err(CommandError)
+                }
+            },
+            None => {
+                get_steam_default_path()
+            }
+        }
+    }
+
+    fn get_steam_default_path() -> Result<PathBuf, CommandError> {
+        let steam_dir = SteamDir::locate()?;
         let (archean, lib) = steam_dir
             .find_app(ARCHEAN_STEAM_ID)?
             .expect("🚨 Archean installed via Steam is required! 🚨");
+
         Ok(lib.resolve_app_dir(&archean))
     }
 
@@ -104,9 +125,9 @@ fn generate_completions<G: Generator>(gen: G, cmd: &mut Command) {
     generate(gen, cmd, COMMAND, &mut std::io::stdout());
 }
 
-fn get_blueprint_path(bp: String) -> Result<PathBuf, CommandError> {
+fn get_blueprint_path(bp: String, args: &ArgMatches) -> Result<PathBuf, CommandError> {
     // Defaults to {STEAM_APPS}\Archean\Archean-data\client\blueprints
-    Ok(Path::new(&prelude::get_archean_path()?)
+    Ok(Path::new(&prelude::get_archean_path(args)?)
         .join("Archean-data")
         .join("client")
         .join("blueprints")
@@ -123,7 +144,7 @@ fn extract_filename(for_id: String, matches: &ArgMatches) -> Result<PathBuf, Com
             });
             let bp_name = bp_name.join(" ");
             let blueprint = format!("{}.json", bp_name);
-            get_blueprint_path(blueprint)
+            get_blueprint_path(blueprint, matches)
         }
         None => {
             return Err(CommandError);

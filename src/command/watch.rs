@@ -17,7 +17,7 @@ pub fn watch_blueprints(matches: &ArgMatches) {
             println!("Blueprint not found, or no blueprint specified, defaulting to watching all blueprints");
         }
     }
-    let archean_path = get_archean_path()
+    let archean_path = get_archean_path(matches)
         .expect("Could not get Archean path")
         .join("Archean-data")
         .join("client")
