@@ -34,6 +34,9 @@ pub mod prelude {
             "complete" => {
                 generate_shell_completion(args);
             }
+            "info" => {
+                show_info(args);
+            }
             "yank" => {
                 yank::yank_xenon_code(args);
             }
