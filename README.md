@@ -6,7 +6,7 @@ A tool to work with Archean blueprints and XenonCode modules; primarily for use 
 The following features are in-development: 
 
 - [X] Yank code from blueprint as `.xc` file
-- [ ] Copy blueprints to current location for packaging
+- [X] Copy blueprints to current location for packaging
 - [ ] Initialize version control
 - [X] Shell completion
 
@@ -18,7 +18,9 @@ Usage: archbelt [COMMAND]
 
 Commands:
   yank      Yank code files from a blueprint
-  watch     watch for changes to blueprint file(s); will yank on change
+  watch     watch for changes to blueprint file(s); will yank on change as if -f is set
+  package   Gather metadata and files from blueprint for packaging
+  info      Display information about the blueprint
   complete  Generate shell completion for zsh & bash
   help      Print this message or the help of the given subcommand(s)
 
@@ -39,10 +41,11 @@ Arguments:
   [BLUEPRINT]...  name of the blueprint without .json
 
 Options:
-  -x, --no-collate  do not collate the files by component
-  -f, --folder      yank blueprint files to folder named after blueprint
-  -w, --watch       watch for changes to the blueprint; yanks files on change; assumes -f
-  -h, --help        Print help
+      --blueprint-path <PATH>  path to blueprints folder
+  -x, --no-collate             do not collate the files by component
+  -f, --folder                 yank blueprint files to folder named after blueprint
+  -w, --watch                  watch for changes to the blueprint; yanks files on change; assumes -f
+  -h, --help                   Print help
 ```
 
 ### Watch
@@ -57,8 +60,39 @@ Arguments:
   [TARGET]...  target blueprint name (if none given, watches all)
 
 Options:
-  -x, --no-collate  do not collate the files by component (use at own risk; this can get very messy..)
-  -h, --help        Print help
+      --blueprint-path <PATH>  path to blueprints folder
+  -x, --no-collate             do not collate the files by component (use at own risk; this can get very messy..)
+  -h, --help                   Print help
+```
+
+### Package
+Primarily for putting things together in a folder structure conducive to packaging for distribution or version control. This will create a folder named after the blueprint, and put all the xc files in it. It will also create a `archbelt.json` file with the blueprint's metadata and place a copy of the blueprint json alongside it.
+
+This is still a work in progress and the format of `archbelt.json` is subject to change.
+
+```
+Gather metadata and files from blueprint for packaging
+
+Usage: archbelt package [OPTIONS] [BLUEPRINT]...
+
+Arguments:
+  [BLUEPRINT]...  name of the blueprint without .json
+
+Options:
+      --blueprint-path <PATH>  path to blueprints folder
+  -h, --help                   Print help
+```
+
+### Info
+Dumps general information about environment. Not a lot here.. yet.
+```
+Display information about the blueprint
+
+Usage: archbelt info [OPTIONS]
+
+Options:
+      --blueprint-path <PATH>  path to blueprints folder
+  -h, --help                   Print help
 ```
 
 ### Shell Completion

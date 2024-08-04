@@ -47,7 +47,7 @@ impl From<PackageConfig> for YankConfig {
         YankConfig {
             file_name: config.file_name,
             folder: true,
-            watch: config.watch,
+            watch: config.watch, // TODO: handle watch state ... maybe 0.5.0 ish?
             disable_collate: false
         }
     }
