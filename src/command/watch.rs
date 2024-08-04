@@ -4,6 +4,7 @@ use clap::ArgMatches;
 use notify::{Watcher, RecursiveMode, Result as NotifyResult};
 use notify_debouncer_full::{DebouncedEvent, new_debouncer};
 use crate::command;
+use crate::command::get_blueprints_path;
 use super::prelude::*;
 
 pub fn watch_blueprints(matches: &ArgMatches) {
@@ -17,11 +18,7 @@ pub fn watch_blueprints(matches: &ArgMatches) {
             println!("Blueprint not found, or no blueprint specified, defaulting to watching all blueprints");
         }
     }
-    let archean_path = get_archean_path()
-        .expect("Could not get Archean path")
-        .join("Archean-data")
-        .join("client")
-        .join("blueprints");
+    let archean_path = get_blueprints_path(matches).expect("Could not get Archean blueprints path");
     watch_event(&archean_path).expect("Could not watch Archean blueprints path; is Archean installed via Steam?");
 }
 
