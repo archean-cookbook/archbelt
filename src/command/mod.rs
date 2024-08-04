@@ -116,14 +116,22 @@ fn show_info(args: &ArgMatches) {
     let archean_path = prelude::get_archean_path(args);
     match archean_path {
         Ok(path) => {
-            println!("Archean path: {:?}", path);
+            println!("Archean path: {:?} (exists: {})", path, path.exists());
         }
         Err(_) => {
-            println!("Could not get Archean path");
+            eprintln!("Could not get Archean path");
         }
     }
 
-    // let blueprints_path =
+    let blueprints_path = get_blueprints_path(args);
+    match blueprints_path {
+        Ok(path) => {
+            println!("Blueprints path: {:?} (exists: {})", path, path.exists());
+        }
+        Err(_) => {
+            eprintln!("Could not get blueprints path");
+        }
+    }
 }
 
 // MARK: - Helper functions
