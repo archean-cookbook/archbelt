@@ -113,14 +113,7 @@ fn show_info(args: &ArgMatches) {
     }
 
     let blueprints_path = get_blueprints_path(args);
-    match blueprints_path {
-        Ok(path) => {
-            println!("Blueprints path: {:?} (exists: {})", path, path.exists());
-        }
-        Err(_) => {
-            eprintln!("Could not get blueprints path");
-        }
-    }
+    println!("Blueprints path: {:?} (exists: {})", blueprints_path, blueprints_path.is_ok());
 }
 
 // MARK: - Helper functions
