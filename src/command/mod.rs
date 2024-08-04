@@ -26,6 +26,7 @@ pub mod prelude {
             .subcommand(descriptors::yank_command())
             .subcommand(descriptors::watch_command())
             // TODO: Add package_command
+            .subcommand(descriptors::info_command())
             .subcommand(descriptors::complete_command())
     }
 
