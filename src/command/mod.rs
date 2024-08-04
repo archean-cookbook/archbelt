@@ -34,6 +34,9 @@ pub mod prelude {
             "info" => {
                 show_info(args);
             }
+            "package" => {
+                package::package_from_blueprint(args);
+            }
             "yank" => {
                 yank::yank_xenon_code(args);
             }
