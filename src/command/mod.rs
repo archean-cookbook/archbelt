@@ -51,11 +51,12 @@ pub mod prelude {
     }
 
     pub fn get_archean_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
-        let path = args.get_one::<PathBuf>("game-path");
+        let path = args.get_one::<String>("game-path");
         match path {
             Some(path) => {
-                if path.exists() {
-                    Ok(path.clone())
+                let path_buf = PathBuf::from(path);
+                if path_buf.exists() {
+                    Ok(path_buf.clone())
                 } else {
                     Err(CommandError)
                 }
@@ -152,12 +153,13 @@ fn generate_completions<G: Generator>(gen: G, cmd: &mut Command) {
 }
 
 fn get_blueprints_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
-    let blueprint_path_from_args = args.get_one::<PathBuf>("blueprint-path");
+    let blueprint_path_from_args = args.get_one::<String>("blueprint-path");
 
     match blueprint_path_from_args {
         Some(path) => {
-            if path.exists() {
-                Ok(path.clone())
+            let path_buf = PathBuf::from(path);
+            if path_buf.exists() {
+                Ok(path_buf.clone())
             } else {
                 Err(CommandError)
             }
