@@ -112,6 +112,20 @@ fn generate_shell_completion(args: &ArgMatches) {
     }
 }
 
+fn show_info(args: &ArgMatches) {
+    let archean_path = prelude::get_archean_path(args);
+    match archean_path {
+        Ok(path) => {
+            println!("Archean path: {:?}", path);
+        }
+        Err(_) => {
+            println!("Could not get Archean path");
+        }
+    }
+
+    // let blueprints_path =
+}
+
 // MARK: - Helper functions
 fn get_blueprint_object(path: PathBuf) -> Result<String, CommandError> {
     let bp_string = fs::read_to_string(path);
@@ -125,8 +139,9 @@ fn generate_completions<G: Generator>(gen: G, cmd: &mut Command) {
     generate(gen, cmd, COMMAND, &mut std::io::stdout());
 }
 
-fn get_blueprint_path(bp: String, args: &ArgMatches) -> Result<PathBuf, CommandError> {
+fn get_blueprints_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
     let blueprint_path_from_args = args.get_one::<PathBuf>("blueprint-path");
+
     match blueprint_path_from_args {
         Some(path) => {
             if path.exists() {
@@ -140,11 +155,18 @@ fn get_blueprint_path(bp: String, args: &ArgMatches) -> Result<PathBuf, CommandE
             Ok(Path::new(&prelude::get_archean_path(args)?)
                 .join("Archean-data")
                 .join("client")
-                .join("blueprints")
-                .join(bp))
+                .join("blueprints"))
         }
     }
+}
 
+fn get_blueprint_path(bp: String, args: &ArgMatches) -> Result<PathBuf, CommandError> {
+    let blueprints_path =  get_blueprints_path(args)?;
+    Ok(Path::new(&prelude::get_archean_path(args)?)
+        .join("Archean-data")
+        .join("client")
+        .join("blueprints")
+        .join(bp))
 }
 
 fn extract_filename(for_id: String, matches: &ArgMatches) -> Result<PathBuf, CommandError> {
