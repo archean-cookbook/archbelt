@@ -27,7 +27,7 @@ pub mod prelude {
             .subcommand(descriptors::complete_command())
     }
 
-    pub fn match_commands(sub_command: &str, args: &ArgMatches, parent_args: &ArgMatches) {
+    pub fn match_commands(sub_command: &str, args: &ArgMatches) {
         match sub_command {
             "complete" => {
                 generate_shell_completion(args);
