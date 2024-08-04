@@ -15,7 +15,7 @@ pub struct PackageConfig {
 pub struct BlueprintMetadata {
     pub(crate) name: Option<String>,
     pub(crate) version: String,
-    pub(crate) description: String,
+    pub(crate) mass: f64,
     pub(crate) author: String,
     pub(crate) license: Option<String>,
     pub(crate) keywords: Vec<String>,
@@ -33,7 +33,7 @@ impl From<Blueprint> for BlueprintMetadata {
         BlueprintMetadata {
             name: None,
             version: value.version.to_string(),
-            description: format!("mass: {}", value.mass),
+            mass: value.mass,
             author: value.author,
             license: None, // TODO: implement license output in .json file
             keywords: vec![],
