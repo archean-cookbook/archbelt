@@ -87,14 +87,14 @@ impl FromArgMatches for PackageConfig {
 }
 
 fn get_blueprint_metadata(config: PackageConfig) -> BlueprintMetadata {
-    let blueprint_name = config.file_name.to_str().unwrap().to_string();
+    let blueprint_name = config.file_name.file_stem().unwrap().to_string_lossy().to_string();
     let blueprint = command::get_blueprint_object(config.file_name.clone());
 
     match blueprint {
         Ok(bp) => {
-            let blueprint: Option<Blueprint> = serde_json::from_str(bp.as_str()).ok();
-            match blueprint {
-                Some(blueprint) => {
+            let res: serde_json::error::Result<Blueprint> = serde_json::from_str(bp.as_str());
+            match res {
+                Ok(blueprint) => {
                     let mut metadata = BlueprintMetadata::from(blueprint);
                     metadata.set_name(blueprint_name);
                     return metadata;
