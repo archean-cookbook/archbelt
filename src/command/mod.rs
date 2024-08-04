@@ -13,7 +13,6 @@ use std::ops::Deref;
 use crate::statics::{ARCHEAN_STEAM_ID, COMMAND, DESCRIPTION, VERSION};
 
 pub mod prelude {
-    use clap::arg;
     use super::*;
     pub fn app() -> Command {
         // Initialize the main command, `archbelt`
@@ -103,10 +102,17 @@ fn generate_shell_completion(args: &ArgMatches) {
 
 fn show_info(args: &ArgMatches) {
     let archean_path = prelude::get_archean_path().expect("Could not get Archean path; is it installed?");
-    println!("Archean path: {:?} (exists: {})", archean_path.clone(), archean_path.exists());
+    println!("Archean path: {:?} (exists: {})", archean_path, archean_path.exists());
 
-    let blueprints_path = get_blueprints_path(args).expect("Could not get blueprints path; is Archean installed? did you provide an invalid path to --blueprint-path?");
-    println!("Blueprints path: {:?} (exists: {})", blueprints_path.clone(), blueprints_path.exists());
+    let blueprints_path = get_blueprints_path(args);
+    match blueprints_path {
+        Ok(path) => {
+            println!("Blueprints path: {:?} (exists: {})", path, path.exists());
+        }
+        Err(_) => {
+            eprintln!("Could not get blueprints path; is Archean installed? did you provide an invalid path to --blueprint-path?");
+        }
+    }
 }
 
 // MARK: - Helper functions
