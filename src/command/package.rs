@@ -40,9 +40,10 @@ pub fn package_from_blueprint(args: &ArgMatches) {
     let config = PackageConfig::from_arg_matches(args);
     match config {
         Ok(config) => {
-            // Do something with the config
-            let yank_config = YankConfig::from(config);
-            yank_from_config(yank_config);
+            // fetch metadata from blueprint
+            // TODO
+            // yank files
+            yank_from_config(config.into());
         }
         Err(e) => {
             eprintln!("Error: {:?}", e);
