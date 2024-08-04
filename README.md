@@ -68,6 +68,8 @@ Options:
 ### Package
 Primarily for putting things together in a folder structure conducive to packaging for distribution or version control. This will create a folder named after the blueprint, and put all the xc files in it. It will also create a `archbelt.json` file with the blueprint's metadata and place a copy of the blueprint json alongside it.
 
+This will place everything in the folder you run the command from; example - `archbelt package example` will create a folder named `example`, a file named `archbelt.json`, and a copy of the blueprint .json file in the current directory. Then, it will place all the xc files from the blueprint in the folder `example`.
+
 This is still a work in progress and the format of `archbelt.json` is subject to change.
 
 ```
