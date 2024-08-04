@@ -10,7 +10,7 @@ fn main() {
 
     match sub_command_details {
         Some((sub_command, args)) => {
-            match_commands(sub_command, args);
+            match_commands(sub_command, args, &matches);
         }
         None => {
             app().print_long_help().unwrap();

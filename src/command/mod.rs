@@ -20,9 +20,6 @@ pub mod prelude {
         Command::new(COMMAND)
             .version(VERSION)
             .about(DESCRIPTION)
-            .arg(arg!(--"game-path" <PATH> "override path to game root")
-                .num_args(1)
-                .required(false))
             .subcommand(descriptors::yank_command())
             .subcommand(descriptors::watch_command())
             // TODO: Add package_command
@@ -30,7 +27,7 @@ pub mod prelude {
             .subcommand(descriptors::complete_command())
     }
 
-    pub fn match_commands(sub_command: &str, args: &ArgMatches) {
+    pub fn match_commands(sub_command: &str, args: &ArgMatches, parent_args: &ArgMatches) {
         match sub_command {
             "complete" => {
                 generate_shell_completion(args);
@@ -50,21 +47,8 @@ pub mod prelude {
         }
     }
 
-    pub fn get_archean_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
-        let path = args.get_one::<String>("game-path");
-        match path {
-            Some(path) => {
-                let path_buf = PathBuf::from(path);
-                if path_buf.exists() {
-                    Ok(path_buf.clone())
-                } else {
-                    Err(CommandError)
-                }
-            },
-            None => {
-                get_steam_default_path()
-            }
-        }
+    pub fn get_archean_path() -> Result<PathBuf, CommandError> {
+        get_steam_default_path()
     }
 
     fn get_steam_default_path() -> Result<PathBuf, CommandError> {
@@ -118,7 +102,7 @@ fn generate_shell_completion(args: &ArgMatches) {
 }
 
 fn show_info(args: &ArgMatches) {
-    let archean_path = prelude::get_archean_path(args);
+    let archean_path = prelude::get_archean_path();
     match archean_path {
         Ok(path) => {
             println!("Archean path: {:?} (exists: {})", path, path.exists());
@@ -166,7 +150,7 @@ fn get_blueprints_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
         }
         None => {
             // Defaults to {STEAM_APPS}\Archean\Archean-data\client\blueprints
-            Ok(Path::new(&prelude::get_archean_path(args)?)
+            Ok(Path::new(&prelude::get_archean_path()?)
                 .join("Archean-data")
                 .join("client")
                 .join("blueprints"))
@@ -174,13 +158,37 @@ fn get_blueprints_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
     }
 }
 
-fn get_blueprint_path(bp: String, args: &ArgMatches) -> Result<PathBuf, CommandError> {
-    let blueprints_path =  get_blueprints_path(args)?;
-    Ok(Path::new(&prelude::get_archean_path(args)?)
-        .join("Archean-data")
-        .join("client")
-        .join("blueprints")
-        .join(bp))
+pub fn get_blueprint_path(bp: String, args: &ArgMatches) -> Result<PathBuf, CommandError> {
+    let blueprints_path =  get_blueprints_path(args);
+    match blueprints_path {
+        Ok(path) => {
+            let blueprint_path = path.join(bp);
+            if blueprint_path.exists() {
+                Ok(blueprint_path)
+            } else {
+                eprintln!("Blueprint path not found: {:?}", blueprint_path);
+                Err(CommandError)
+            }
+        }
+        Err(_) => {
+            match &prelude::get_archean_path() {
+                Ok(path) => {
+                    let blueprint_path = path.join("Archean-data")
+                        .join("client")
+                        .join("blueprints")
+                        .join(bp);
+                    if blueprint_path.exists() {
+                        Ok(blueprint_path)
+                    } else {
+                        Err(CommandError)
+                    }
+                }
+                _ => {
+                    Err(CommandError)
+                }
+            }
+        }
+    }
 }
 
 fn extract_filename(for_id: String, matches: &ArgMatches) -> Result<PathBuf, CommandError> {
