@@ -1,6 +1,6 @@
 [package]
 name = "archbelt"
-version = "0.3.0"
+version = "0.4.0"
 description = "A tool to work with Archean blueprints and XenonCode modules"
 license = "MIT"
 authors = ["Michael K <tsalaroth@gmail.com>"]
@@ -14,7 +14,7 @@ exclude = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "4.5"
+clap = { version = "4.5", features = ["derive"] }
 clap_complete = "4.5"
 steamlocate = "2.0.0-beta.2"
 serde_derive = "1.0.204"
