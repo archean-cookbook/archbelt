@@ -7,11 +7,52 @@ use crate::command;
 use crate::command::prelude::WatchState;
 use crate::command::watch::watch_event;
 
+use clap::{Command, Parser, Subcommand};
+use clap::error::ErrorKind;
+use crate::command::{Commands, CommandError, get_simple_blueprints_path};
+
+// #[derive(Parser)]
+// #[command(name = "yank", about = "Yank code files from a blueprint")]
+// pub struct Yank {
+//     #[arg(arg, long, short, about = "name of the blueprint without .json")]
+//     pub blueprint: String,
+//     #[clap(long, short, about = "yank blueprint files to folder named after blueprint")]
+//     pub folder: bool,
+//     #[clap(long, short, about = "watch for changes to the blueprint; yanks files on change; assumes -f")]
+//     pub watch: bool,
+//     #[clap(long, short, about = "do not collate the files by component")]
+//     pub no_collate: bool
+// }
+
 pub struct YankConfig {
     pub(crate) file_name: PathBuf,
     pub(crate) folder: bool,
     pub(crate) watch: WatchState,
     pub(crate) disable_collate: bool
+}
+
+impl From<Commands> for YankConfig {
+    fn from(cmd: Commands) -> Self {
+        match cmd {
+            Commands::Yank { blueprint, folder, watch, no_collate } => {
+                YankConfig {
+                    file_name: new_extract_filename(blueprint).expect("Could not create file name from blueprint"),
+                    folder,
+                    watch: if watch { WatchState::Requested } else { WatchState::Disabled },
+                    disable_collate: no_collate
+                }
+            }
+            _ => {
+                panic!("Invalid command type passed to YankConfig::from");
+            }
+        }
+    }
+}
+
+fn new_extract_filename(blueprint: Vec<String>) -> Result<PathBuf, CommandError> {
+    let bp_name = blueprint.join(" ");
+    let bp_path = get_simple_blueprints_path()?;
+    Ok(bp_path.join(format!("{}.json", bp_name)))
 }
 
 impl FromArgMatches for YankConfig {
@@ -54,25 +95,26 @@ impl FromArgMatches for YankConfig {
     }
 }
 
-pub fn yank_xenon_code(args: &ArgMatches) {
-    let config = YankConfig::from_arg_matches(args);
-    match config {
-        Ok(config) => {
-            match config.watch {
-                WatchState::Requested | WatchState::Watching => {
-                    watch_event(config.file_name.clone()).expect("Could not watch blueprint path");
-                    return
-                }
-                _ => {
-                    yank_from_config(config);
-                }
-            }
+pub fn yank_xenon_code_from_config(config: YankConfig) -> Result<(), Error> {
+    return match config.watch {
+        WatchState::Requested | WatchState::Watching => {
+            watch_event(config.file_name.clone()).expect("Could not watch blueprint path");
+            Err(Error::new(ErrorKind::InvalidValue))
         }
-        Err(_) => {
-            eprintln!("🚨 Blueprint not found! 🚨");
-            std::process::exit(1);
+        _ => {
+            yank_from_config_with_result(config)
         }
     }
+}
+
+pub fn yank_xenon_code(args: &ArgMatches) {
+    let config = YankConfig::from_arg_matches(args).expect("Could not create YankConfig from args");
+    yank_xenon_code_from_config(config).expect("Could not yank xenon code");
+}
+
+pub fn yank_from_config_with_result(config: YankConfig) -> Result<(), Error> {
+    yank_from_config(config);
+    Ok(()) // TODO: error handling
 }
 
 pub fn yank_from_config(config: YankConfig) {

@@ -3,17 +3,71 @@ mod descriptors;
 mod watch;
 mod package;
 
-use clap::{ArgMatches, Command, Error};
+use clap::{ArgMatches, Command, Error, Parser, Subcommand};
 use clap_complete::{generate, Generator, Shell};
 use clap::error::ErrorKind;
 use std::path::{Path, PathBuf};
 use steamlocate::SteamDir;
 use std::fs;
 use std::ops::Deref;
+use crate::command::yank::YankConfig;
 use crate::statics::{ARCHEAN_STEAM_ID, COMMAND, DESCRIPTION, VERSION};
 
+#[derive(Parser)]
+#[command(name = "archbelt", version = "0.4.0", about = "A tool to work with Archean blueprints and XenonCode modules")]
+pub struct Archbelt {
+    #[command(subcommand)]
+    pub command: Commands,
+    // #[subcommand]
+    // watch: Watch,
+    // #[subcommand]
+    // package: Package,
+    // #[subcommand]
+    // info: Info,
+    // #[subcommand]
+    // complete: Complete
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Yank code files from a blueprint
+    Yank {
+        /// Name of the blueprint without .json
+        #[arg(num_args(0..), required = true, trailing_var_arg = true)]
+        blueprint: Vec<String>,
+        /// Yank blueprint files to folder named after blueprint
+        #[arg(long, short)]
+        folder: bool,
+        /// Watch for changes to the blueprint; yanks files on change; assumes -f
+        #[arg(long, short)]
+        watch: bool,
+        /// Do not collate the files by component
+        #[arg(long, short)]
+        no_collate: bool
+    }
+}
+
 pub mod prelude {
+    pub use crate::command::yank::yank_xenon_code_from_config;
     use super::*;
+
+    pub fn parser_app() -> Archbelt {
+        Archbelt::parse()
+    }
+
+    pub fn parser_match() -> Result<(), Error> {
+        let app = parser_app();
+        return match &app.command {
+            Commands::Yank { blueprint, folder, watch, no_collate } => {
+                let yank_config = YankConfig::from(app.command);
+                yank_xenon_code_from_config(yank_config)
+            },
+            _ => {
+                Err(Error::new(ErrorKind::InvalidSubcommand))
+            }
+        }
+    }
+
     pub fn app() -> Command {
         // Initialize the main command, `archbelt`
         Command::new(COMMAND)
@@ -129,6 +183,11 @@ fn get_blueprint_object(path: PathBuf) -> Result<String, CommandError> {
 
 fn generate_completions<G: Generator>(gen: G, cmd: &mut Command) {
     generate(gen, cmd, COMMAND, &mut std::io::stdout());
+}
+
+fn get_simple_blueprints_path() -> Result<PathBuf, CommandError> {
+    let archean_path = prelude::get_archean_path()?;
+    Ok(archean_path.join("Archean-data").join("client").join("blueprints"))
 }
 
 fn get_blueprints_path(args: &ArgMatches) -> Result<PathBuf, CommandError> {
